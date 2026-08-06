@@ -52,6 +52,9 @@ with no history because the gas effect is shared physics, not memorized per-well
 ├── simplified_aspm_events.csv                # 320 labeled training events
 ├── aspm_candidate_actions.csv                # 132 candidate actions to score (no target)
 ├── scored_candidate_actions.csv              # OUTPUT: candidates + predictions, intervals, decisions
+├── analysis_config.yaml                       # configuration / parameters
+├── CODE_WALKTHROUGH.md                        # cell-by-cell walkthrough of the notebook
+├── ASPM_Takehome_Slides.pptx                  # presentation deck
 └── README.md
 ```
 
