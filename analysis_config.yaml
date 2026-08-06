@@ -1,0 +1,74 @@
+# Analysis configuration for the ASPM surrogate modeling take-home.
+# This is a parameter manifest that documents every knob used in
+# ASPM_Surrogate_Modeling_Challenge.ipynb. The notebook currently sets these
+# values inline; this file is the single reference for them.
+
+project: ASPM surrogate modeling take-home
+last_updated: 2026-07-17
+random_state: 42
+
+data:
+  events: simplified_aspm_events.csv        # 320 events, 12 wells, 4 lift modes
+  candidates: aspm_candidate_actions.csv     # 132 candidate actions, 6 wells, no target
+  scored_output: scored_candidate_actions.csv
+
+target: target_delta_liquid_48h_m3d
+# Held out of the feature matrix as metadata (event_quality_label is a post-hoc
+# label, used only for weighting and diagnostics, never as a model feature).
+metadata_columns: [event_id, event_time, event_quality_label]
+sample_weight_column: data_quality_score
+
+validation:
+  scheme: out_of_fold
+  random_cv: {type: KFold, n_splits: 5, shuffle: true}      # seen-well interpolation
+  group_cv: {type: GroupKFold, n_splits: 5, group: well_id} # new-well generalization
+  time_split: {train_fraction: 0.75, order_by: event_time}  # drift check
+
+surrogate:
+  model: Ridge
+  alpha: 1.0
+  numeric_features: [action_delta_gas_e3m3d, downtime_flag, facility_constraint_flag]
+  categorical_features: [current_lift_mode]
+  preprocessing: {numeric: StandardScaler, categorical: OneHotEncoder(handle_unknown=ignore)}
+  quality_weighted: true
+
+uncertainty:
+  method: normalized_split_conformal
+  calibration_residuals: group_out_of_fold
+  difficulty_model:
+    estimator: HistGradientBoostingRegressor
+    max_depth: 2
+    max_iter: 150
+    learning_rate: 0.05
+    min_samples_leaf: 25
+    l2_regularization: 1.0
+    features: [abs_gas_action, data_quality_score, production_volatility,
+               liquid_loading_risk, support_distance, downtime_flag,
+               facility_flag, watercut]
+  sigma_floor: 0.25_times_median_abs_residual
+  conformal_multipliers: {level_80: 1.747, level_90: 2.607}
+  support:
+    method: mean_5_nearest_neighbour_distance
+    space: standardized_context_plus_action
+    out_of_support_threshold: train_p95   # = 3.734
+
+recommendation_rule:
+  decide_on: lower_confidence_bound_80    # never the raw predicted mean
+  gates:
+    lcb80_above: 0.0                      # entire 80% interval above zero
+    in_support: support_distance <= train_p95
+    gas_within: abs(gas_change) <= historical_p95   # = 16.1 e3m3d
+    clean_regime: downtime_flag == 0 and facility_constraint_flag == 0
+    min_data_quality: 0.60
+
+results:
+  surrogate_group_oof: {R2: 0.408, MAE: 2.53, RMSE: 3.61}
+  surrogate_random_oof: {R2: 0.406, MAE: 2.53}
+  conformal_coverage: {level_80: 0.803, level_90: 0.903}
+  interval_width_mean_m3d: {clean: 8.2, low_quality: 8.9, contaminated: 11.9}
+  candidates: {total: 132, recommended: 12, held: 120}
+
+environment:
+  python: "3.13"
+  interpreter: C:\Users\BioAro\AppData\Local\Programs\Python\Python313\python.exe
+  key_packages: [numpy, pandas, "scikit-learn==1.7.1", scipy, matplotlib]
