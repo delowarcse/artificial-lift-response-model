@@ -1,4 +1,4 @@
-# ASPM Surrogate Modeling — Artificial-Lift Setpoint Optimization
+# ASPM Surrogate Modeling - Artificial-Lift Setpoint Optimization
 
 > Predicting the 48-hour liquid-rate response to a gas-lift setpoint change, and scoring
 > candidate actions under **calibrated uncertainty** so only confident, in-support gains are recommended.
@@ -52,10 +52,6 @@ with no history because the gas effect is shared physics, not memorized per-well
 ├── simplified_aspm_events.csv                # 320 labeled training events
 ├── aspm_candidate_actions.csv                # 132 candidate actions to score (no target)
 ├── scored_candidate_actions.csv              # OUTPUT: candidates + predictions, intervals, decisions
-├── analysis_config.yaml                       # configuration / parameters
-├── CODE_WALKTHROUGH.md                        # cell-by-cell walkthrough of the notebook
-├── ASPM_Takehome_Slides.pptx                  # presentation deck
-├── ASPM_Takehome_Candidate_Writeup.pdf        # written summary
 └── README.md
 ```
 
@@ -165,5 +161,3 @@ a monitoring + recalibration loop, engineering-owned guardrails, and a human in 
 input to a recommendation, not an autonomous controller.
 
 ---
-
-*Senior Data Scientist take-home assignment.*
