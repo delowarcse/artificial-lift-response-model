@@ -1,7 +1,6 @@
-# ASPM Surrogate Modeling — Code Walkthrough & Interview Prep
+# ASPM Surrogate Modeling — Code Walkthrough
 
-A cell-by-cell, line-by-line guide to `ASPM_Surrogate_Modeling_Challenge.ipynb`, written so you can
-**talk through every line out loud** and defend the choices. Each section has:
+A cell-by-cell, line-by-line guide to `ASPM_Surrogate_Modeling_Challenge.ipynb`, Each section has:
 
 - **What the code does** (line by line where it's non-obvious)
 - **Why it's there** (the reasoning an interviewer wants to hear)
@@ -9,7 +8,7 @@ A cell-by-cell, line-by-line guide to `ASPM_Surrogate_Modeling_Challenge.ipynb`,
 
 ---
 
-## 0. The 60-second story (say this first)
+## 0. The 60-second story
 
 > "Each row is a historical well intervention: the pre-change state `s`, the setpoint action `x`,
 > and the observed 48-hour change in liquid rate. I built a surrogate `f(s, x) → Δliquid`.
@@ -539,7 +538,7 @@ print(diag.assign(action=action_bin).groupby('action', observed=True).agg(...))
 - The calibration plot (nominal vs empirical) + the "half-width grows with |residual|" scatter visualize
   exactly this.
 
-**Likely questions**
+**questions**
 - *"Why conformal instead of a Bayesian posterior or bootstrap?"* → distribution-free finite-sample
   coverage guarantee, no distributional assumptions, cheap, and it reuses the OOF residuals I already
   have. Perfect for a small noisy dataset.
@@ -676,15 +675,14 @@ scored.to_csv('scored_candidate_actions.csv', index=False)
 
 ## Cell 25 — Written summary
 The markdown answers the 7 required questions (model, validation, performance, uncertainty, failure modes,
-recommendation rule, field readiness). Skim it once before the interview — it's your script. Key
-field-readiness asks to remember: **interventional/randomized data** (to get causal not associational
+recommendation rule, field readiness). Key field-readiness asks to remember: **interventional/randomized data** (to get causal not associational
 effects), **more wells**, **coverage of the afterflow/close-time levers**, a **monitoring + recalibration
 loop**, **engineering-owned guardrails**, and a **human-in-the-loop** (this is one input, not an autonomous
 controller).
 
 ---
 
-## The 8 questions you're most likely to get — one-line answers
+## The 8 questions — one-line answers
 
 1. **Why linear over boosting?** Signal is low + near-linear; on group CV nothing beats it; parsimony
    generalizes and is auditable for a safety decision.
@@ -705,7 +703,7 @@ controller).
 
 ---
 
-## Two honest "gotcha" answers (so you're not caught flat)
+## Two honest "gotcha"
 
 - **"Your R² is only 0.41 — isn't that weak?"** → Even at near-zero gas action the label still spreads
   ~3.2 m³/d, which implies an achievable R² ceiling near 0.5 — and that 3.2 is an *upper* bound on the noise
